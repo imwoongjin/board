@@ -32,6 +32,7 @@ def signin(request):
     email = request.POST.get('email')
     pwd = request.POST.get('pwd')
     
+    
     try:
       # select * from user where email=? and pwd=?
       user = User.objects.get(email=email, pwd=pwd)
