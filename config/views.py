@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import hashlib
 
 def index(request):
@@ -12,7 +12,7 @@ def index(request):
   return render(request, 'index.html')
 
 from django.http import HttpResponseRedirect
-from article.models import User
+from article.models import Reply, User
 
 def signup(request):
   if request.method == 'POST':
