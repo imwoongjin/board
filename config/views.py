@@ -117,6 +117,7 @@ def update(request, id):
   # 작성자명 확인
   if article.user.name != name:
     return HttpResponse(''' 
+    
       <script>
         alert("작성자만 수정할 수 있습니다.");
         location = "/article/detail/%s/";
