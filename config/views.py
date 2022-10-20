@@ -31,12 +31,14 @@ def signin(request):
     # 회원정보 조회
     email = request.POST.get('email')
     pwd = request.POST.get('pwd')
-    
+
     
     try:
       # select * from user where email=? and pwd=?
       user = User.objects.get(email=email, pwd=pwd)
       request.session['email'] = email
+      request.session['name'] = user.name
+     
       return render(request, 'signin_success.html')
     except:
       return render(request, 'signin_fail.html')
@@ -69,11 +71,32 @@ def write(request):
 
   return render(request, 'write.html')
 
+from django.core.paginator import Paginator
+
 def list(request):
+  page = request.GET.get('page')
+ 
+
   # select * from article order by id desc
   article_list = Article.objects.order_by('-id')
+  
+  p = Paginator(article_list, 10)
+  try:
+    page = int(page)
+    article_list = p.page(page)
+  except:
+    page = 1
+    article_list = p.page(page)  
+  
+  start_page = (page-1) // 10 * 10 +1
+  end_page = start_page + 9
+
+  if p.num_pages < end_page:
+    end_page = p.num_pages
+  
   context = { 
-    'article_list' : article_list 
+    'article_list' : article_list,
+    'page_info' : range(start_page, end_page + 1)
   }
   return render(request, 'list.html', context)
 
@@ -88,6 +111,18 @@ def detail(request, id):
 def update(request, id):
   # select * from article where id = ?
   article = Article.objects.get(id=id)
+  # 로그인한 사용자의 정보 확인 
+  name = request.session.get('name')
+  print(name, article.user.name)
+  # 작성자명 확인
+  if article.user.name != name:
+    return HttpResponse(''' 
+      <script>
+        alert("작성자만 수정할 수 있습니다.");
+        location = "/article/detail/%s/";
+      </script>
+      ''' % id)
+
 
   if request.method == 'POST':
     title = request.POST.get('title')
@@ -110,8 +145,18 @@ def update(request, id):
 def delete(request, id):
   try:
     # select * from article where id = ?
+    name = request.session['name']
+
     article = Article.objects.get(id=id)
-    article.delete()
+    if article.user.name == name:
+       article.delete()
+    else:
+     return HttpResponse('''
+      <script>
+        alert("작성자만 삭제할 수 있습니다.");
+        location = "/article/detail/%s/";
+      </script>
+      ''' % id)
     return render(request, 'delete_success.html')
   except:
     return render(request, 'delete_fail.html')
