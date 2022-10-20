@@ -161,6 +161,17 @@ def delete(request, id):
     return render(request, 'delete_success.html')
   except:
     return render(request, 'delete_fail.html')
+def reply(request, id):
+  email = request.session.get('email')
+  user = User.objects.get(email=email)
+  article = Article.objects.get(id=id)
+  content = request.GET.get('content')
+
+  reply = Reply(content=content, user=user, article=article)
+  reply.save()
+
+  return redirect('/article/detail/%s/' % id)
+
 
 def map(request):
   return render(request, 'map.html')
