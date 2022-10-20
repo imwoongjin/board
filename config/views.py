@@ -161,6 +161,7 @@ def delete(request, id):
     return render(request, 'delete_success.html')
   except:
     return render(request, 'delete_fail.html')
+    
 def reply(request, id):
   email = request.session.get('email')
   user = User.objects.get(email=email)
